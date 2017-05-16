@@ -11,16 +11,20 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
-public class main extends JavaPlugin{
-
+public class main extends JavaPlugin {
 	
 	@SuppressWarnings("unused")
 	@Override
@@ -59,7 +63,7 @@ public class main extends JavaPlugin{
 				} else if (args.length == 1) {
 					if (args[0].equalsIgnoreCase("toggle")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { toggleStatus(p, false); return true;}}
 					if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("+")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { addItem(p, false); return true;}}
-					if (args[0].equalsIgnoreCase("gui")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { guiOpen(p, false); return true;}}
+					if (args[0].equalsIgnoreCase("gui")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { guiOpen(p, "main", false); return true;}}
 					if (args[0].equalsIgnoreCase("rem") || args[0].equalsIgnoreCase("del") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("-")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { removeItem(p, false); return true;}}
 					if (args[0].equalsIgnoreCase("clear") || args[0].equalsIgnoreCase("c")) {if (checkPermsMsg(p, "itemfilterpickup.user")){ clearList(p, false); return true;}}
 					if (args[0].equalsIgnoreCase("list")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { viewList(p, 1, false); return true;}}
@@ -82,7 +86,7 @@ public class main extends JavaPlugin{
 					if (args[0].equalsIgnoreCase("reload")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.reload")) { reloadConfig(); reloadPlayers(); pSend(p, getConfig().getString("Messages.reload")); return true;}}
 					if (args[0].equalsIgnoreCase("toggle")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.toggle")) { toggleStatus(p, true); return true;}}
 					if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("+")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.edit")) { addItem(p, true); return true;}}
-					if (args[0].equalsIgnoreCase("gui")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { guiOpen(p, true); return true;}}
+					if (args[0].equalsIgnoreCase("gui")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { guiOpen(p, "main", true); return true;}}
 					if (args[0].equalsIgnoreCase("rem") || args[0].equalsIgnoreCase("del") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("-")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.edit")) { removeItem(p, true); return true;}}
 					if (args[0].equalsIgnoreCase("clear") || args[0].equalsIgnoreCase("c")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.edit")){ clearList(p, true); return true;}}
 					if (args[0].equalsIgnoreCase("list")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.edit") || checkPermsMsg(p, "itemfilterpickup.public.view")) { viewList(p, 1, true); return true;}}
@@ -101,11 +105,161 @@ public class main extends JavaPlugin{
 		return false;
 	}
 	
+	public String ct(String text) {
+		String finalText = text.replace("&0", ChatColor.BLACK + "").replace("&1", ChatColor.DARK_BLUE + "").replace("&2", ChatColor.DARK_GREEN + "").replace("&3", ChatColor.DARK_AQUA + "").replace("&4", ChatColor.DARK_RED + "").replace("&5", ChatColor.DARK_PURPLE + "").replace("&6", ChatColor.GOLD + "").replace("&7", ChatColor.GRAY + "").replace("&8", ChatColor.DARK_GRAY + "").replace("&9", ChatColor.BLUE + "").replace("&a", ChatColor.GREEN + "").replace("&b", ChatColor.AQUA + "").replace("&c", ChatColor.RED + "").replace("&d", ChatColor.LIGHT_PURPLE + "").replace("&e", ChatColor.YELLOW + "").replace("&f", ChatColor.WHITE + "").replace("&l", ChatColor.BOLD + "").replace("&m", ChatColor.STRIKETHROUGH + "").replace("&n", ChatColor.UNDERLINE + "").replace("&o", ChatColor.ITALIC + "").replace("&r", ChatColor.RESET + "");
+		return finalText;
+	}
 	
-	public void guiOpen(Player p, Boolean admin) {
+	public  ItemStack createItem(String it, int amount, int data) {
+		ItemStack item = new ItemStack(Material.matchMaterial(it), amount, (byte) data);
+		return item;
+	}
+	public  ItemStack addName(ItemStack it, String name) {
+		if (!name.equalsIgnoreCase("none")) {
+			ItemMeta m = it.getItemMeta();
+	        m.setDisplayName(ct(name));
+	        it.setItemMeta(m);
+			return it;
+		} else {
+			return it;
+		}
+		
+	}
+	public  ItemStack addEnchant(ItemStack it, String enchantList) {
+		if (!enchantList.equalsIgnoreCase("none")) {
+			String[] e = enchantList.split(",");
+			for (String preEnchant : e) {
+				String[] enchant = preEnchant.split("@");
+				it.addUnsafeEnchantment(Enchantment.getByName(enchant[0]), Integer.parseInt(enchant[1]));
+			}
+			return it;
+		} else {
+			return it;
+		}
+		
+	}
+	public  ItemStack addLore(ItemStack it, String loreList) {
+		if (!loreList.equalsIgnoreCase("none")) {
+			ItemMeta m = it.getItemMeta();
+			List<String> lores = new ArrayList<String>();
+			String[] preLores = loreList.split(",");
+			for (String lore : preLores) { lores.add(ct(lore)); }
+	        m.setLore(lores);
+	        it.setItemMeta(m);
+			return it;
+		} else {
+			return it;
+		}
+	}
+	
+	public  ItemStack getItem(String item) {
+		String[] i = item.split(":"); // added
+	    Integer amount = Integer.parseInt(i[2]); //added
+	    String enchant = i[3];
+	    String name = i[4];
+	    String lore = i[5];
+	    ItemStack newItem = createItem(i[0], amount, Integer.parseInt(i[1]));
+		if (!enchant.equalsIgnoreCase("none")) {
+			newItem = addEnchant(newItem, enchant);
+		}
+		if (!name.equalsIgnoreCase("none")) {
+			newItem = addName(newItem, name);
+		}
+		if (!lore.equalsIgnoreCase("none")) {
+			newItem = addLore(newItem, lore);
+		}
+		
+		return newItem;
 		
 	}
 	
+	public ItemStack addGlow(ItemStack it) {
+		ItemMeta im = it.getItemMeta();
+		enchant_glow glow = new enchant_glow(179);
+		im.addEnchant(glow, 1, true);
+		it.setItemMeta(im);
+		return it;
+		
+	}
+	
+	public void guiOpen(Player p, String menu, Boolean admin) {
+		switch (menu) {
+		case "main":
+			p.openInventory(mainGUIMenu(p, admin));
+			break;
+		}
+			
+		
+	}
+	
+	public Inventory mainGUIMenu(Player p, Boolean admin) {
+		if (admin) {
+			Inventory myInv = Bukkit.createInventory(null, 9, ct("&cAdmin &7Main Menu"));
+			myInv.setItem(2, getItem("LAVA_BUCKET:0:1:none:&cR&8emove &cM&8enu:none"));
+			myInv.setItem(4, getItem("WATER_BUCKET:0:1:none:&aA&8dd &aM&8enu:none"));
+			myInv.setItem(6, getItem("BUCKET:0:1:none:&9V&8iew &9M&8enu:none"));
+			return myInv;
+		} else {
+			Inventory myInv = Bukkit.createInventory(null, 9, ct("&9Player &7Main Menu"));
+			myInv.setItem(2, getItem("LAVA_BUCKET:0:1:none:&aR&8emove &aM&8enu:none"));
+			myInv.setItem(4, getItem("WATER_BUCKET:0:1:none:&aA&8dd &aM&8enu:none"));
+			myInv.setItem(6, getItem("BUCKET:0:1:none:&aV&8iew &aM&8enu:none"));
+			return myInv;
+		}
+		
+	}
+	
+	public Inventory addremGUIMenu(Player p, int page, Boolean admin) {
+
+		
+	}
+	
+	public Inventory viewGUIMenu(Player p, int page, Boolean admin) {
+		int invI = 0;
+		List<String> items = new ArrayList<String>();
+		if (admin) {
+			items = getConfig().getStringList("Public Pickup Filter.Items");
+		} else {
+			items = getPlayers().getStringList("Players."+p.getUniqueId().toString()+".Items");
+		}
+		double listLength = items.size();
+		double length = 32;
+		double pages = Math.ceil((double)listLength/(double)length);
+		int i = 0;
+		Inventory myInv = Bukkit.createInventory(null, 36, ct("&cAdmin &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
+		if (admin) {
+			myInv = Bukkit.createInventory(null, 36, ct("&cAdmin &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));	
+		} else {
+			myInv = Bukkit.createInventory(null, 36, ct("&9Player &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
+		}
+		for (String item : items) {
+			if (i < (length * page)) {
+				if (i >= length * (page - 1)) {
+					int max = listener.getMaxFilter(p);
+					if (max >= i+1 || max == -1) {
+						myInv.setItem(invI, enchant_glow.addGlow(getItem(item + ":1:none:none:none")));
+					} else {
+						myInv.setItem(invI, getItem(item + ":1:none:none:none"));
+					}
+					
+					System.out.println(invI + " " + item);
+					invI++;
+					i++;
+					continue;
+				}
+			}
+			i++;
+		}
+		if (page > 1) {
+			myInv.setItem(33, getItem("STAINED_GLASS:14:1:none:&cP&8age &cB&8ack:none"));
+		}
+		if (listLength >= 32 && !(invI < 32)) {
+			myInv.setItem(34, getItem("STAINED_GLASS:5:1:none:&aP&8age &aF&8orward:none"));
+		}
+		
+		myInv.setItem(35, getItem("CHEST:0:1:none:&9M&8ain &9M&8enu:none"));
+		return myInv;
+	}
 	
 	private void help(Player p) {
 		String sendMessage = "&7----- &6Item Filter Help &7-----\n";
