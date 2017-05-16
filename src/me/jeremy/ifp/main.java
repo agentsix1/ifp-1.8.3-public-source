@@ -66,7 +66,7 @@ public class main extends JavaPlugin{
 					try {
 						if (args[0].equalsIgnoreCase("list")) {if (p.hasPermission("itemfilterpickup.user") & checkPermsMsg(p, "itemfilterpickup.user")) { viewList(p, Integer.parseInt(args[1]), false); return true; }}
 					} catch (NumberFormatException e) {
-						pSend(p, getConfig().getString("Messages.failed-command").replaceAll("%SYNTAX%", "/ifp list {#}").replaceAll("%NL%", "\n"));
+						pSend(p, getConfig().getString("Messages.failed-command").replace("%SYNTAX%", "/ifp list {#}").replace("%NL%", "\n"));
 						return true;
 					}
 					
@@ -88,7 +88,7 @@ public class main extends JavaPlugin{
 					try {
 						if (args[0].equalsIgnoreCase("list")) {if (p.hasPermission("itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.public.view") || checkPermsMsg(p, "itemfilterpickup.admin.edit")) { viewList(p, Integer.parseInt(args[1]), true); return true; }}
 					} catch (NumberFormatException e) {
-						pSend(p, getConfig().getString("Messages.failed-command").replaceAll("%SYNTAX%", "/ifpa list {#}").replaceAll("%NL%", "\n"));
+						pSend(p, getConfig().getString("Messages.failed-command").replace("%SYNTAX%", "/ifpa list {#}").replace("%NL%", "\n"));
 						return true;
 					}
 					
@@ -243,9 +243,9 @@ public class main extends JavaPlugin{
 	private void removeItem(Player p, Boolean admin) {
 		if (false) {
 			//if (database.removeItem(p, p.getItemInHand().getType().toString() + ":" + p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0])) {
-			//	pSend(p, getConfig().getString("Messages.remove-success-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+			//	pSend(p, getConfig().getString("Messages.remove-success-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 			//} else {
-			//	pSend(p, getConfig().getString("Messages.remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+			//	pSend(p, getConfig().getString("Messages.remove-fail-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 			//}
 		} else {
 			List<String> removeItems = new ArrayList<String>();
@@ -261,20 +261,20 @@ public class main extends JavaPlugin{
 							getConfig().set("Public Pickup Filter.Items", removeItems);
 							saveConfig();
 							reloadConfig();
-							pSend(p, getConfig().getString("Messages.public-remove-success-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+							pSend(p, getConfig().getString("Messages.public-remove-success-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 						} else {
 							getPlayers().set("Players." + p.getUniqueId().toString() + ".Items", removeItems);
 							savePlayers();
 							reloadPlayers();
-							pSend(p, getConfig().getString("Messages.remove-success-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+							pSend(p, getConfig().getString("Messages.remove-success-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 						}
 						
 						
 					} else {
 						if (admin) {
-							pSend(p, getConfig().getString("Messages.public-remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+							pSend(p, getConfig().getString("Messages.public-remove-fail-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 						} else {
-							pSend(p, getConfig().getString("Messages.remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+							pSend(p, getConfig().getString("Messages.remove-fail-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 						}
 						
 					}
@@ -288,9 +288,9 @@ public class main extends JavaPlugin{
 			if (false) {
 				String item = p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0];
 				/*if (database.addToFilter(p, p.getItemInHand().getType().toString() + ":" + item)) {
-					pSend(p, getConfig().getString("Messages.add-to-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+					pSend(p, getConfig().getString("Messages.add-to-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 				} else {
-					pSend(p, getConfig().getString("Messages.already-added-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+					pSend(p, getConfig().getString("Messages.already-added-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 				}*/
 				
 			} else { 
@@ -304,10 +304,10 @@ public class main extends JavaPlugin{
 				String item = p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0];
 				if (items.contains(p.getItemInHand().getType().toString() + ":" + item)) {
 					if (admin) {
-						pSend(p, getConfig().getString("Messages.public-already-added-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+						pSend(p, getConfig().getString("Messages.public-already-added-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 						return;
 					} else {
-						pSend(p, getConfig().getString("Messages.already-added-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+						pSend(p, getConfig().getString("Messages.already-added-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 						return;
 					}
 					
@@ -317,13 +317,13 @@ public class main extends JavaPlugin{
 					getConfig().set("Public Pickup Filter.Items", items);
 					saveConfig();
 					reloadConfig();
-					pSend(p, getConfig().getString("Messages.public-add-to-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+					pSend(p, getConfig().getString("Messages.public-add-to-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 				} else {
 					items.add(p.getItemInHand().getType().toString() + ":" + item);
 					getPlayers().set("Players." + p.getUniqueId().toString() + ".Items", items);
 					savePlayers();
 					reloadPlayers();
-					pSend(p, getConfig().getString("Messages.add-to-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+					pSend(p, getConfig().getString("Messages.add-to-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 				}
 				
 			}
@@ -334,24 +334,39 @@ public class main extends JavaPlugin{
 		if (false) {
 			/*if (!database.getState(p)) {
 				database.setState(p, 1);
-				pSend(p, getConfig().getString("Messages.toggle-filter").replaceAll("%STATE%", "&aON&r").replaceAll("%STATE_REVERSE%", "&cOFF&r"));
+				pSend(p, getConfig().getString("Messages.toggle-filter").replace("%STATE%", "&aON&r").replace("%STATE_REVERSE%", "&cOFF&r"));
 			} else {
 				database.setState(p, 0);
-				pSend(p, getConfig().getString("Messages.toggle-filter").replaceAll("%STATE%", "&cOFF&r").replaceAll("%STATE_REVERSE%", "&aON&r"));
+				pSend(p, getConfig().getString("Messages.toggle-filter").replace("%STATE%", "&cOFF&r").replace("%STATE_REVERSE%", "&aON&r"));
 			}*/
 			
 		} else {
-			if (!getPlayers().getBoolean("Players." + p.getUniqueId().toString() + ".Enabled")) {
-				getPlayers().set("Players." + p.getUniqueId().toString() + ".Enabled", true);
-				savePlayers();
-				reloadPlayers();
-				pSend(p, getConfig().getString("Messages.toggle-filter").replaceAll("%STATE%", "&aON&r").replaceAll("%STATE_REVERSE%", "&cOFF&r"));
+			if (admin) {
+				if (!getPlayers().getBoolean("Public Pickup Filter.Enabled")) {
+					getConfig().set("Public Pickup Filter.Enabled", true);
+					saveConfig();
+					reloadConfig();
+					pSend(p, getConfig().getString("Messages.public-toggle-filter").replace("%STATE%", "&aON&r").replace("%STATE_REVERSE%", "&cOFF&r"));
+				} else {
+					getConfig().set("Public Pickup Filter.Enabled", false);
+					saveConfig();
+					reloadConfig();
+					pSend(p, getConfig().getString("Messages.public-toggle-filter").replace("%STATE%", "&cOFF&r").replace("%STATE_REVERSE%", "&aON&r"));
+				}
 			} else {
-				getPlayers().set("Players." + p.getUniqueId().toString() + ".Enabled", false);
-				savePlayers();
-				reloadPlayers();
-				pSend(p, getConfig().getString("Messages.toggle-filter").replaceAll("%STATE%", "&cOFF&r").replaceAll("%STATE_REVERSE%", "&aON&r"));
+				if (!getPlayers().getBoolean("Players." + p.getUniqueId().toString() + ".Enabled")) {
+					getPlayers().set("Players." + p.getUniqueId().toString() + ".Enabled", true);
+					savePlayers();
+					reloadPlayers();
+					pSend(p, getConfig().getString("Messages.toggle-filter").replace("%STATE%", "&aON&r").replace("%STATE_REVERSE%", "&cOFF&r"));
+				} else {
+					getPlayers().set("Players." + p.getUniqueId().toString() + ".Enabled", false);
+					savePlayers();
+					reloadPlayers();
+					pSend(p, getConfig().getString("Messages.toggle-filter").replace("%STATE%", "&cOFF&r").replace("%STATE_REVERSE%", "&aON&r"));
+				}
 			}
+			
 			
 		}
 	}
