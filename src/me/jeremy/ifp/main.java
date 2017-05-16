@@ -26,10 +26,10 @@ public class main extends JavaPlugin{
 	@Override
 	public void onEnable() {
 		Bukkit.getServer().getPluginManager().registerEvents(new listener(this), this);
-		Bukkit.getServer().getPluginManager().registerEvents(new database(this), this);
+		//Bukkit.getServer().getPluginManager().registerEvents(new database(this), this);
 		loadConfiguration();
 		if (false) {
-	    	database.connect();
+	    	//database.connect();
 	    }
 		System.out.println("[ItemFilterPickup] Plugin is fully loaded and ready to go! Good luck!");
 	}
@@ -157,7 +157,7 @@ public class main extends JavaPlugin{
 		int max = listener.getMaxFilter(p);
 		List<String> filterList = new ArrayList<String>();
 		if (false) {
-			filterList = database.getFilterList(p);
+			//filterList = database.getFilterList(p);
 		} else {
 			filterList = getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items");
 		}
@@ -198,11 +198,11 @@ public class main extends JavaPlugin{
 	@SuppressWarnings("unused")
 	private void removeItem(Player p) {
 		if (false) {
-			if (database.removeItem(p, p.getItemInHand().getType().toString() + ":" + p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0])) {
-				pSend(p, getConfig().getString("Messages.remove-success-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
-			} else {
-				pSend(p, getConfig().getString("Messages.remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
-			}
+			//if (database.removeItem(p, p.getItemInHand().getType().toString() + ":" + p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0])) {
+			//	pSend(p, getConfig().getString("Messages.remove-success-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+			//} else {
+			//	pSend(p, getConfig().getString("Messages.remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+			//}
 		} else {
 			List<String> removeItems = getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items");
 					if (removeItems.remove(p.getItemInHand().getType().toString() + ":" + p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0])) {
@@ -222,11 +222,11 @@ public class main extends JavaPlugin{
 	private void addItem(Player p) {
 			if (false) {
 				String item = p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0];
-				if (database.addToFilter(p, p.getItemInHand().getType().toString() + ":" + item)) {
+				/*if (database.addToFilter(p, p.getItemInHand().getType().toString() + ":" + item)) {
 					pSend(p, getConfig().getString("Messages.add-to-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
 				} else {
 					pSend(p, getConfig().getString("Messages.already-added-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
-				}
+				}*/
 				
 			} else { 
 				List<String> items = getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items");
@@ -246,13 +246,13 @@ public class main extends JavaPlugin{
 	@SuppressWarnings("unused")
 	public void toggleStatus(Player p) {
 		if (false) {
-			if (!database.getState(p)) {
+			/*if (!database.getState(p)) {
 				database.setState(p, 1);
 				pSend(p, getConfig().getString("Messages.toggle-filter").replaceAll("%STATE%", "&aON&r").replaceAll("%STATE_REVERSE%", "&cOFF&r"));
 			} else {
 				database.setState(p, 0);
 				pSend(p, getConfig().getString("Messages.toggle-filter").replaceAll("%STATE%", "&cOFF&r").replaceAll("%STATE_REVERSE%", "&aON&r"));
-			}
+			}*/
 			
 		} else {
 			if (!getPlayers().getBoolean("Players." + p.getUniqueId().toString() + ".Enabled")) {

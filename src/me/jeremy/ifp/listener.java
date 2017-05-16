@@ -20,7 +20,7 @@ public class listener implements Listener{
 	@EventHandler
 	public static void onJoin(PlayerJoinEvent e) {
 		if (false) { 
-			database.attemptAddorUpdate(e.getPlayer());	
+			//database.attemptAddorUpdate(e.getPlayer());	
 		} else {
 			plugin.getPlayers().set("Players." + e.getPlayer().getUniqueId().toString() + ".Name", e.getPlayer().getName());
 			plugin.saveConfig();
@@ -79,7 +79,8 @@ public class listener implements Listener{
 				return false;
 			}
 		} else {
-			return database.checkDatabase(p, i);
+			return false;
+			//return database.checkDatabase(p, i);
 		}
 	}
 
