@@ -56,18 +56,39 @@ public class main extends JavaPlugin{
 					help(p); 
 					return true;
 				} else if (args.length == 1) {
-					if (args[0].equalsIgnoreCase("reload")) {if (checkPermsMsg(p, "itemfilterpickup.admin")) { reloadConfig(); reloadPlayers(); pSend(p, getConfig().getString("Messages.reload")); return true;}}
-					if (args[0].equalsIgnoreCase("toggle")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { toggleStatus(p); return true;}}
-					if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("+")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { addItem(p); return true;}}
-					if (args[0].equalsIgnoreCase("rem") || args[0].equalsIgnoreCase("del") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("-")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { removeItem(p); return true;}}
-					if (args[0].equalsIgnoreCase("clear") || args[0].equalsIgnoreCase("c")) {if (checkPermsMsg(p, "itemfilterpickup.user")){ clearList(p); return true;}}
-					if (args[0].equalsIgnoreCase("list")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { viewList(p, 1); return true;}}
+					if (args[0].equalsIgnoreCase("toggle")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { toggleStatus(p, false); return true;}}
+					if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("+")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { addItem(p, false); return true;}}
+					if (args[0].equalsIgnoreCase("rem") || args[0].equalsIgnoreCase("del") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("-")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { removeItem(p, false); return true;}}
+					if (args[0].equalsIgnoreCase("clear") || args[0].equalsIgnoreCase("c")) {if (checkPermsMsg(p, "itemfilterpickup.user")){ clearList(p, false); return true;}}
+					if (args[0].equalsIgnoreCase("list")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { viewList(p, 1, false); return true;}}
 					if (args[0].equalsIgnoreCase("help")) { help(p); return true;}
 				} else if (args.length == 2) { 
 					try {
-						if (args[0].equalsIgnoreCase("list")) {if (p.hasPermission("itemfilterpickup.user") & checkPermsMsg(p, "itemfilterpickup.user")) { viewList(p, Integer.parseInt(args[1])); return true; }}
+						if (args[0].equalsIgnoreCase("list")) {if (p.hasPermission("itemfilterpickup.user") & checkPermsMsg(p, "itemfilterpickup.user")) { viewList(p, Integer.parseInt(args[1]), false); return true; }}
 					} catch (NumberFormatException e) {
 						pSend(p, getConfig().getString("Messages.failed-command").replaceAll("%SYNTAX%", "/ifp list {#}").replaceAll("%NL%", "\n"));
+						return true;
+					}
+					
+				}
+			}
+			if (cmdLabel.equalsIgnoreCase("ifpa") || cmdLabel.equalsIgnoreCase("itemfilteradmin")) {
+				if (args.length == 0) {
+					help(p); 
+					return true;
+				} else if (args.length == 1) {
+					if (args[0].equalsIgnoreCase("reload")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.reload")) { reloadConfig(); reloadPlayers(); pSend(p, getConfig().getString("Messages.reload")); return true;}}
+					if (args[0].equalsIgnoreCase("toggle")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.toggle")) { toggleStatus(p, true); return true;}}
+					if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("+")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.edit")) { addItem(p, true); return true;}}
+					if (args[0].equalsIgnoreCase("rem") || args[0].equalsIgnoreCase("del") || args[0].equalsIgnoreCase("delete") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("-")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.edit")) { removeItem(p, true); return true;}}
+					if (args[0].equalsIgnoreCase("clear") || args[0].equalsIgnoreCase("c")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.edit")){ clearList(p, true); return true;}}
+					if (args[0].equalsIgnoreCase("list")) {if (checkPermsMsg(p, "itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.admin.edit") || checkPermsMsg(p, "itemfilterpickup.public.view")) { viewList(p, 1, true); return true;}}
+					if (args[0].equalsIgnoreCase("help")) { help(p); return true;}
+				} else if (args.length == 2) { 
+					try {
+						if (args[0].equalsIgnoreCase("list")) {if (p.hasPermission("itemfilterpickup.admin") || checkPermsMsg(p, "itemfilterpickup.public.view") || checkPermsMsg(p, "itemfilterpickup.admin.edit")) { viewList(p, Integer.parseInt(args[1]), true); return true; }}
+					} catch (NumberFormatException e) {
+						pSend(p, getConfig().getString("Messages.failed-command").replaceAll("%SYNTAX%", "/ifpa list {#}").replaceAll("%NL%", "\n"));
 						return true;
 					}
 					
@@ -145,21 +166,30 @@ public class main extends JavaPlugin{
 		return true;
 	}
 
-	private void clearList(Player p) {
-		getPlayers().set("Players." + p.getUniqueId().toString() + ".Items", new ArrayList<String>());
-		savePlayers();
-		pSend(p, getConfig().getString("Messages.clear-filter"));
-		
+	private void clearList(Player p, Boolean admin) {
+		if (admin) {
+			getConfig().set("Public Pickup Filter.Items", "");
+			saveConfig();
+			pSend(p, getConfig().getString("Messages.public-clear-filter"));
+		} else {
+			getPlayers().set("Players." + p.getUniqueId().toString() + ".Items", new ArrayList<String>());
+			savePlayers();
+			pSend(p, getConfig().getString("Messages.clear-filter"));
+		}		
 	}
 
 	@SuppressWarnings("unused")
-	private void viewList(Player p, int page) {
+	private void viewList(Player p, int page, Boolean admin) {
 		int max = listener.getMaxFilter(p);
 		List<String> filterList = new ArrayList<String>();
 		if (false) {
 			//filterList = database.getFilterList(p);
 		} else {
-			filterList = getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items");
+			if (!admin) {
+				filterList = getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items");
+			} else {
+				filterList = getConfig().getStringList("Public Pickup Filter.Items");
+			}
 		}
 		
 		String filter = "";
@@ -172,19 +202,28 @@ public class main extends JavaPlugin{
 			if (i < (length * page)) {
 				if (i >= length * (page - 1)) {
 					if (filter.equalsIgnoreCase("")) {
-						if (max >= i || max == -1) {
-							filter = getConfig().getString("Messages.filter-item-layout").replaceAll("%#%", i + "").replaceAll("%ITEM%", "&a" + item);	
+						if (!admin) {
+							if (max >= i || max == -1) {
+								filter = getConfig().getString("Messages.filter-item-layout").replace("%#%", i + "").replace("%ITEM%", "&a" + item);	
+							} else {
+								filter = getConfig().getString("Messages.filter-item-layout").replace("%#%", i + "").replace("%ITEM%", "&c" + item);
+							}
 						} else {
-							filter = getConfig().getString("Messages.filter-item-layout").replaceAll("%#%", i + "").replaceAll("%ITEM%", "&c" + item);
+							filter = getConfig().getString("Messages.public-filter-item-layout").replace("%#%", i + "").replace("%ITEM%", "&a" + item);	
 						}
 						
 					} else {
 						if (!item.equalsIgnoreCase("")) {
-							if (max >= i || max == -1) {
-								filter = filter + "\n" + getConfig().getString("Messages.filter-item-layout").replaceAll("%#%", i + "").replaceAll("%ITEM%", "&a" + item);
+							if (!admin) {
+								if (max >= i || max == -1) {
+									filter = filter + "\n" + getConfig().getString("Messages.filter-item-layout").replace("%#%", i + "").replace("%ITEM%", "&a" + item);
+								} else {
+									filter = filter + "\n" + getConfig().getString("Messages.filter-item-layout").replace("%#%", i + "").replace("%ITEM%", "&c" + item);
+								}
 							} else {
-								filter = filter + "\n" + getConfig().getString("Messages.filter-item-layout").replaceAll("%#%", i + "").replaceAll("%ITEM%", "&c" + item);
+								filter = filter + "\n" + getConfig().getString("Messages.public-filter-item-layout").replace("%#%", i + "").replace("%ITEM%", "&a" + item);
 							}
+							
 							
 						}
 					}
@@ -192,11 +231,16 @@ public class main extends JavaPlugin{
 			} else { break; }
 			i++;
 		}	
-		pSend(p, getConfig().getString("Messages.filter-layout").replaceAll("%ITEMS%", filter).replaceAll("%CUR_PAGE%", (page + "").replaceAll(".0", "")).replaceAll("%ALL_PAGE%", (pages + "").replaceAll(".0", "")).replaceAll("%LIST_SIZE%", (length + "").replaceAll(".0", "")).replaceAll("%ALL_ITEM_COUNT%", (listLength + "").replaceAll(".0", "")).replaceAll("%NL%", "\n"));
+		if (!admin) {
+			pSend(p, getConfig().getString("Messages.filter-layout").replace("%ITEMS%", filter).replace("%CUR_PAGE%", (page + "").replace(".0", "")).replace("%ALL_PAGE%", (pages + "").replace(".0", "")).replace("%LIST_SIZE%", (length + "").replace(".0", "")).replace("%ALL_ITEM_COUNT%", (listLength + "").replace(".0", "")).replace("%NL%", "\n"));
+		} else {
+			pSend(p, getConfig().getString("Messages.public-filter-layout").replace("%ITEMS%", filter).replace("%CUR_PAGE%", (page + "").replace(".0", "")).replace("%ALL_PAGE%", (pages + "").replace(".0", "")).replace("%LIST_SIZE%", (length + "").replace(".0", "")).replace("%ALL_ITEM_COUNT%", (listLength + "").replace(".0", "")).replace("%NL%", "\n"));
+		}
+		
 	}
 
 	@SuppressWarnings("unused")
-	private void removeItem(Player p) {
+	private void removeItem(Player p, Boolean admin) {
 		if (false) {
 			//if (database.removeItem(p, p.getItemInHand().getType().toString() + ":" + p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0])) {
 			//	pSend(p, getConfig().getString("Messages.remove-success-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
@@ -219,7 +263,7 @@ public class main extends JavaPlugin{
 	}
 	
 	@SuppressWarnings("unused")
-	private void addItem(Player p) {
+	private void addItem(Player p, Boolean admin) {
 			if (false) {
 				String item = p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0];
 				/*if (database.addToFilter(p, p.getItemInHand().getType().toString() + ":" + item)) {
@@ -244,7 +288,7 @@ public class main extends JavaPlugin{
 	}
 
 	@SuppressWarnings("unused")
-	public void toggleStatus(Player p) {
+	public void toggleStatus(Player p, Boolean admin) {
 		if (false) {
 			/*if (!database.getState(p)) {
 				database.setState(p, 1);
