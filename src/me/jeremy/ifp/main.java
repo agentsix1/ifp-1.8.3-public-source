@@ -342,7 +342,7 @@ public class main extends JavaPlugin{
 			
 		} else {
 			if (admin) {
-				if (!getPlayers().getBoolean("Public Pickup Filter.Enabled")) {
+				if (!getConfig().getBoolean("Public Pickup Filter.Enabled")) {
 					getConfig().set("Public Pickup Filter.Enabled", true);
 					saveConfig();
 					reloadConfig();
