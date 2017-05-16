@@ -271,7 +271,12 @@ public class main extends JavaPlugin{
 						
 						
 					} else {
-						pSend(p, getConfig().getString("Messages.remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+						if (admin) {
+							pSend(p, getConfig().getString("Messages.public-remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+						} else {
+							pSend(p, getConfig().getString("Messages.remove-fail-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+						}
+						
 					}
 			
 		}
@@ -289,17 +294,38 @@ public class main extends JavaPlugin{
 				}*/
 				
 			} else { 
-				List<String> items = getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items");
+				List<String> items = new ArrayList<String>();
+				if (admin) {
+					items = getConfig().getStringList("Public Pickup Filter.Items");
+				} else {
+					items = getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items");
+				}
+				 
 				String item = p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0];
 				if (items.contains(p.getItemInHand().getType().toString() + ":" + item)) {
-					pSend(p, getConfig().getString("Messages.already-added-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
-					return;
+					if (admin) {
+						pSend(p, getConfig().getString("Messages.public-already-added-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+						return;
+					} else {
+						pSend(p, getConfig().getString("Messages.already-added-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+						return;
+					}
+					
 				}
-				items.add(p.getItemInHand().getType().toString() + ":" + item);
-				getPlayers().set("Players." + p.getUniqueId().toString() + ".Items", items);
-				savePlayers();
-				reloadPlayers();
-				pSend(p, getConfig().getString("Messages.add-to-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+				if (admin) {
+					items.add(p.getItemInHand().getType().toString() + ":" + item);
+					getConfig().set("Public Pickup Filter.Items", items);
+					saveConfig();
+					reloadConfig();
+					pSend(p, getConfig().getString("Messages.public-add-to-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+				} else {
+					items.add(p.getItemInHand().getType().toString() + ":" + item);
+					getPlayers().set("Players." + p.getUniqueId().toString() + ".Items", items);
+					savePlayers();
+					reloadPlayers();
+					pSend(p, getConfig().getString("Messages.add-to-filter").replaceAll("%ITEM%", p.getItemInHand().getType().toString()));
+				}
+				
 			}
 	}
 
