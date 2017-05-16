@@ -14,6 +14,17 @@ Messages:
   clear-filter: '&7You have removed all items from your filter list.'
   reload: '&7You have reloaded the &9Players &7and &9Config &7files.'
   no-permission: '&cYou do not have the permission to use this command.'
+  public-clear-filter: '&7You have removed all items from the public filter list.'
+  public-filter-layout: '&6--- Filter Item List (&c%ALL_ITEM_COUNT%&6) ---%NL%&aFiltered
+    &7| &cNot Filtered &7(Permission Based)%NL%%ITEMS%%NL%&7Page &9%CUR_PAGE%&7/&9%ALL_PAGE%'
+  public-filter-item-layout: '&7%#%. %ITEM%'
+  public-remove-success-filter: '&7You have removed &9%ITEM% &7from the public filter list.'
+  public-remove-fail-filter: '&cIt appears &9%ITEM% &cis not in the public filter or a
+    error occurred.'
+  public-already-added-filter: '&cIt appears the public filter already has &9%ITEM% &cin the list.'
+  public-add-to-filter: '&9%ITEM% &7has been added to the public filter list.'
+  public-toggle-filter: '&7The public filter is currently %STATE%&7. Repeat this command to set
+    it to %STATE_REVERSE%&7.'
 Permission/Filter Amount:
  - user:2
  - extrauser:5
@@ -30,5 +41,3 @@ Public Pickup Filter:
   Enabled: false
   Items:
   - BEDROCK:0
-
-    
