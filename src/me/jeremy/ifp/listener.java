@@ -1,12 +1,15 @@
 package me.jeremy.ifp;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.Inventory;
@@ -31,76 +34,156 @@ public class listener implements Listener{
 			plugin.getPlayers().set("Players." + e.getPlayer().getUniqueId().toString() + ".Items", new ArrayList<String>());
 			plugin.saveConfig();
 			plugin.reloadPlayers();
+			plugin.mnuVal.put(e.getPlayer(), -1);
 			
 		}
-		
+	}
+	
+	@SuppressWarnings("deprecation")
+	@EventHandler
+	public void onInventoryClose(InventoryCloseEvent e) {
+		Player p = Bukkit.getPlayer(e.getPlayer().getName());
+		if (plugin.mnuVal.get(p) > -1) {
+			plugin.mnuVal.put(p, -1);
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
+
+		Player p = (Player) event.getWhoClicked();
+		ItemStack clicked = event.getCurrentItem();
+		Inventory inventory = event.getInventory();
+		if (plugin.enableAdd) {
+			Boolean cont = false;
+			for (String item : plugin.getBlocks().getStringList("Blocks")) {
+				if (item.equals(clicked.getType().toString() + ":" + clicked.getData().getData())){
+					cont = true;
+					plugin.pSend(p, "Block Found");
+				}
+			}
+			if (!cont) {
+				List<String> a = plugin.getBlocks().getStringList("Blocks");
+				a.add(clicked.getType().toString() + ":" + clicked.getData().getData());
+				plugin.getBlocks().set("Blocks", a);
+				plugin.saveBlocks();
+				plugin.pSend(p, "Block Added - " + clicked.getType().toString() + ":" + clicked.getData().getData());
+			}
+			plugin.pSend(p, "Canceled");
+			event.setCancelled(true);
+			
+		}
+		
+			/* - Menu Values
+			 *  - Admin Main Menu (0)
+			 *  - Admin View List (1)
+			 *  - Admin Add/Remove (2)
+			 *  - Player Main Menu (3)
+			 *  - Player View List (4)
+			 *  - Player Add/Remove (5)
+			 */
 		try {
-			Player p = (Player) event.getWhoClicked();
-			ItemStack clicked = event.getCurrentItem();
-			Inventory inventory = event.getInventory();
-			if (inventory.getName().equals(plugin.ct("&cAdmin &7Main Menu"))) {
+			switch (plugin.mnuVal.get(p)) {
+			case 0: // Admin Main Menu
+				plugin.mnuVal.put(p, 0);
 				event.setCancelled(true);
 				if (clicked.getType().toString().equals("LAVA_BUCKET")) {
 					 p.closeInventory();
+				 }
+				if (clicked.getType().toString().equals("WATER_BUCKET")) {
+					plugin.srlVerVal.put(p, 0);
+					plugin.srlHozVal.put(p, 0);
+					 plugin.addremGUIMenu(p, true);
+				 }
+				if (clicked.getType().toString().equals("BUCKET")) {
+					plugin.viewGUIMenu(p, 1, true);
+				 }
+				break;
+			case 1: // Admin View List
+				plugin.mnuVal.put(p, 1);
+				event.setCancelled(true);
+				if (clicked.getType().toString().equals("STAINED_GLASS")) {
+					if (clicked.getData().getData() == (byte) 14) {
+						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
+						plugin.viewGUIMenu(p, pg - 1, true);
+					}
+					if (clicked.getData().getData() == (byte) 5) {
+						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
+						plugin.viewGUIMenu(p, pg + 1, true);
+					}
+				} else if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) { 
+					plugin.mainGUIMenu(p, true);
+				}
+				break;
+			case 2: // Admin Add/Remove
+				plugin.mnuVal.put(p, 2);
+				event.setCancelled(true);
+				break;
+			case 3: // Player Main Menu
+				plugin.mnuVal.put(p, 3);
+				event.setCancelled(true);
+				if (clicked.getType().toString().equals("LAVA_BUCKET")) {
+					 p.closeInventory();
+				 }
+				if (clicked.getType().toString().equals("WATER_BUCKET")) {
+					plugin.srlVerVal.put(p, 0);
+					plugin.srlHozVal.put(p, 0);
+					 plugin.addremGUIMenu(p, false);
 					 
 				 }
-				if (clicked.getType().toString().equals("WATER_BUCKET")) {
-					 p.openInventory(plugin.addGUIMenu(p, true));
-				 }
 				if (clicked.getType().toString().equals("BUCKET")) {
-					p.openInventory(plugin.viewGUIMenu(p, 1, true));
-				 }
-			}
-			
-			if (inventory.getName().equals(plugin.ct("&9Player &7Main Menu"))) {
-				event.setCancelled(true);
-				if (clicked.getType().toString().equals("LAVA_BUCKET")) {
-					 p.closeInventory();
-				 }
-				if (clicked.getType().toString().equals("WATER_BUCKET")) {
-					 p.openInventory(plugin.addGUIMenu(p, false));
-				 }
-				if (clicked.getType().toString().equals("BUCKET")) {
-					p.openInventory(plugin.viewGUIMenu(p, 1, false));
+					plugin.viewGUIMenu(p, 1, false);
 
 				 } 
-			}	
-			
-			if (inventory.getName().contains(plugin.ct("&cAdmin &7List"))) {
+				break;
+			case 4: // Player View List
+				plugin.mnuVal.put(p, 4);
 				event.setCancelled(true);
 				if (clicked.getType().toString().equals("STAINED_GLASS")) {
 					if (clicked.getData().getData() == (byte) 14) {
 						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						p.openInventory(plugin.viewGUIMenu(p, pg - 1, true));
+						plugin.viewGUIMenu(p, pg - 1, false);
 					}
 					if (clicked.getData().getData() == (byte) 5) {
 						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						p.openInventory(plugin.viewGUIMenu(p, pg + 1, true));
+						plugin.viewGUIMenu(p, pg + 1, false);
 					}
 				} else if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) { 
-					p.openInventory(plugin.mainGUIMenu(p, true));
+					plugin.mainGUIMenu(p, false);
 				}
-			}
-			
-			if (inventory.getName().contains(plugin.ct("&9Player &7List"))) {
+				break;
+			case 5: // Player Add/Remove
+				plugin.mnuVal.put(p, 5);
+				if (event.getSlot() > 0 & event.getSlot() < 8) { //Category Change
+					plugin.pSend(p, "Category");	
+				} else 
+				if (event.getSlot() > 8 & event.getSlot() < 17 || event.getSlot() > 17 & event.getSlot() < 26 || event.getSlot() > 26 & event.getSlot() < 35 || 
+						event.getSlot() > 35 & event.getSlot() < 44 || event.getSlot() > 44 & event.getSlot() < 53 ) { // Selected Item
+					plugin.pSend(p, "Item");
+				} else 
+				if (event.getSlot() == 0 & clicked.getData().getData() == (byte) 5){ 
+						plugin.scrollLeft(p, plugin.catItems, plugin.srlHozVal.get(p), false);
+						plugin.pSend(p, "Left");
+				} else
+				if (event.getSlot() == 8 & clicked.getData().getData() == (byte) 5) {
+						plugin.scrollRight(p, plugin.catItems, plugin.srlHozVal.get(p), false);
+						plugin.pSend(p, "Right");
+				} else 
+				if (event.getSlot() == 17 & clicked.getData().getData() == (byte) 5){
+					
+					plugin.scrollUp(p, plugin.catItems, plugin.srlVerVal.get(p), false);
+					plugin.pSend(p, "Up");
+				} else 
+				if (event.getSlot() == 53 & clicked.getData().getData() == (byte) 5) {
+					plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p), false);
+					plugin.pSend(p, "Down");
+				}
+		
+				
 				event.setCancelled(true);
-				if (clicked.getType().toString().equals("STAINED_GLASS")) {
-					if (clicked.getData().getData() == (byte) 14) {
-						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						p.openInventory(plugin.viewGUIMenu(p, pg - 1, false));
-					}
-					if (clicked.getData().getData() == (byte) 5) {
-						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						p.openInventory(plugin.viewGUIMenu(p, pg + 1, false));
-					}
-				} else if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) { 
-					p.openInventory(plugin.mainGUIMenu(p, false));
-				}
+				break;
+				
 			}
 			
 			

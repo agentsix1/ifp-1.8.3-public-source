@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -25,6 +26,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 
 public class main extends JavaPlugin {
+	public Boolean enableAdd = false;
+	public HashMap<Player, Integer> srlVerVal = new HashMap<Player, Integer>();
+	public List<ItemStack> catItems = new ArrayList<ItemStack>();
+	public HashMap<Player, Integer> srlHozVal = new HashMap<Player, Integer>();
+	public HashMap<Player, Integer> mnuVal = new HashMap<Player, Integer>();
+	public HashMap<Player, Integer> selCat = new HashMap<Player, Integer>();
+	public HashMap<Player, Inventory> curInv = new HashMap<Player, Inventory>();
+	
 	
 	@SuppressWarnings("unused")
 	@Override
@@ -50,7 +59,24 @@ public class main extends JavaPlugin {
 	    getPlayers().options().copyDefaults(true);
 	    savePlayers();
 	    reloadPlayers();
+	    getBlocks().options().copyDefaults(true);
+	    saveBlocks();
+	    reloadBlocks();
+	    List<String> preMenus = getBlocks().getStringList("Menus");
+		for (String menu : preMenus) {
+			catItems.add(getItem(getBlocks().getString(menu + ".Block")));
+		}
+					
 	}	
+	
+	public List<ItemStack> getMenuItems(String menu) {
+		List<ItemStack> its = new ArrayList<ItemStack>();
+		List<String> preItem = getBlocks().getStringList(menu);
+		for (String it : preItem) {
+		}
+		return its;
+		
+	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String cmdLabel, String[] args) {
 		if (sender instanceof Player) {
@@ -59,6 +85,25 @@ public class main extends JavaPlugin {
 			if (cmdLabel.equalsIgnoreCase("ifp") || cmdLabel.equalsIgnoreCase("itemfilter")) {
 				if (args.length == 0) {
 					help(p); 
+					if (enableAdd) {
+						enableAdd = false;
+						pSend(p, "Block Add Disabled");
+					} else {
+						enableAdd = true;
+						pSend(p, "Block Add Enabled");
+						Inventory myInv = Bukkit.createInventory(null, 54, ct("&cTest"));
+						myInv.setItem(0, getItem("STONE:0:1:none:none:none"));
+						myInv.setItem(8, getItem("STAINED_GLASS:14:1:none:&aU&8p:none"));
+						myInv.setItem(17, getItem("STAINED_GLASS:0:1:none: :none"));
+						myInv.setItem(26, getItem("STAINED_GLASS:0:1:none: :none"));
+						myInv.setItem(35, getItem("STAINED_GLASS:0:1:none: :none"));
+						myInv.setItem(44, getItem("STAINED_GLASS:5:1:none:&aD&8own:none"));
+						myInv.setItem(45, getItem("STAINED_GLASS:14:1:none:&aD&8own:none"));
+						myInv.setItem(46, getItem("BRICK:0:1:none:&aB&8uilding &aB&8locks:none"));
+						myInv.setItem(53, getItem("STAINED_GLASS:5:1:none:&aD&8own:none"));
+						p.openInventory(myInv);
+						
+					}
 					return true;
 				} else if (args.length == 1) {
 					if (args[0].equalsIgnoreCase("toggle")) {if (checkPermsMsg(p, "itemfilterpickup.user")) { toggleStatus(p, false); return true;}}
@@ -185,51 +230,387 @@ public class main extends JavaPlugin {
 	public void guiOpen(Player p, String menu, Boolean admin) {
 		switch (menu) {
 		case "main":
-			p.openInventory(mainGUIMenu(p, admin));
+			if (admin) {
+				mnuVal.put(p, 0);
+			} else {
+				mnuVal.put(p, 3);
+			}
+			mainGUIMenu(p, admin);
+			
+			
 			break;
 		}
 			
 		
 	}
+		
+	public void scrollUp(Player p, List<ItemStack> items, int scrollCount, Boolean admin) {
+		srlVerVal.put(p, scrollCount - 1);
+		mnuVal.put(p, 2);
+		Inventory myInv = curInv.get(p);
+		if (!admin) {
+			myInv = curInv.get(p);
+			mnuVal.put(p, 5);
+		}
+		List<String> menus = getBlocks().getStringList("Menus");
+		List<String> blocks = getBlocks().getStringList(menus.get(selCat.get(p)) + ".Blocks");
+		if ((scrollCount*8) + (8*5) >= blocks.size()-1) {
+			myInv.setItem(53, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aD&8own:none"));
+		} else {
+			myInv.setItem(53, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aD&8own:none"));
+		}
+		
+		if (scrollCount-1 > 1) {
+			myInv.setItem(17, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aU&8p:none"));
+		} else {
+			myInv.setItem(17, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aU&8p:none"));
+		}
+		
+		int val = 0;
+		
+		val = 8;
+		int start = srlVerVal.get(p)*(val);
+		int slot = 9;
+		for (String Items : blocks) {
+			if (!(val < start)) {
+				if (slot > 52) {
+					break;
+				}
+					if (slot != 17 & slot != 26 & slot != 35 & slot != 44 & slot != 53) {
+						myInv.setItem(slot, getItem(Items + ":1:none:none:none"));	
+						slot++;
+					} else {
+						myInv.setItem(slot + 1, getItem(Items + ":1:none:none:none"));
+						slot+=2;
+					}
+			} else {
+				val++;
+			}
+			
+		}
+		if (slot < 53) {
+			while (slot < 53) {
+				if (slot != 17 & slot != 26 & slot != 35 & slot != 44 & slot != 53) {
+					myInv.setItem(slot, getItem("AIR:0:1:none:none:none"));
+				}
+				slot++;
+			}
+		}
+		curInv.put(p, myInv);
+		p.openInventory(myInv);
+		if (!admin) {
+			mnuVal.put(p, 5);
+		} else {
+			mnuVal.put(p, 2);
+		}
+	}
 	
-	public Inventory mainGUIMenu(Player p, Boolean admin) {
+	public void scrollDown(Player p, List<ItemStack> items, int scrollCount, Boolean admin) {
+			srlVerVal.put(p, scrollCount + 1);
+		mnuVal.put(p, 2);
+		Inventory myInv = curInv.get(p);
+		if (!admin) {
+			myInv = curInv.get(p);
+			mnuVal.put(p, 5);
+		}
+		List<String> menus = getBlocks().getStringList("Menus");
+		List<String> blocks = getBlocks().getStringList(menus.get(selCat.get(p)) + ".Blocks");
+		if ((scrollCount*8) + (8*5) >= blocks.size()-1) {
+			myInv.setItem(53, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aD&8own:none"));
+		} else {
+			myInv.setItem(53, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aD&8own:none"));
+		}
+		
+		if (scrollCount+1 > 1) {
+			myInv.setItem(17, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aU&8p:none"));
+		} else {
+			myInv.setItem(17, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aU&8p:none"));
+		}
+		
+		int val = 0;
+		
+		
+		val = 8;
+		int start = srlVerVal.get(p)*(val);
+		int slot = 9;
+		for (String Items : blocks) {
+			if (!(val < start)) {
+				if (slot > 52) {
+					break;
+				}
+				
+					if (slot != 17 & slot != 26 & slot != 35 & slot != 44 & slot != 53) {
+						myInv.setItem(slot, getItem(Items + ":1:none:none:none"));	
+						slot++;
+					} else {
+						myInv.setItem(slot + 1, getItem(Items + ":1:none:none:none"));
+						slot+=2;
+					}
+			}
+			val++;
+		}
+		if (slot < 53) {
+			while (slot < 53) {
+				if (slot != 17 & slot != 26 & slot != 35 & slot != 44 & slot != 53) {
+					myInv.setItem(slot, getItem("AIR:0:1:none:none:none"));
+				}
+				slot++;
+			}
+		}
+		curInv.put(p, myInv);
+		p.openInventory(myInv);
+		if (!admin) {
+			mnuVal.put(p, 5);
+		} else {
+			mnuVal.put(p, 2);
+		}
+	}
+	
+	public void scrollRight(Player p, List<ItemStack> items, int scrollCount, Boolean admin) {
+		srlHozVal.put(p, scrollCount + 1);
+		scrollCount = scrollCount + 1;
+		int i = 0;
+		mnuVal.put(p, 2);
+		Inventory myInv = curInv.get(p);
+		if (!admin) {
+			myInv = curInv.get(p);
+			mnuVal.put(p, 5);
+		}
+		int distMenu = 6;
+		int val = 0;
+		if (scrollCount + 6 >= items.size()-1) {
+			myInv.setItem(8, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aR&8ight:none"));
+		}
+		if (scrollCount > 0) {
+			myInv.setItem(0, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aL&8eft:none"));
+		}
+		for (ItemStack item : items) {
+				if (scrollCount <= i) {
+					if (!(val > distMenu)) {
+						if (selCat.get(p) == i) {
+							myInv.setItem(val + 1, enchant_glow.addGlow(item));
+							val++;
+						} else {
+							myInv.setItem(val + 1, item);
+							val++;
+						}
+					}
+					
+			}
+			i++;
+		}
+		curInv.put(p, myInv);
+		p.openInventory(myInv);
+		if (!admin) {
+			mnuVal.put(p, 5);
+		} else {
+			mnuVal.put(p, 2);
+		}
+	}
+	
+	public void scrollLeft(Player p, List<ItemStack> items, int scrollCount, Boolean admin) {
+		srlHozVal.put(p, scrollCount - 1);
+		scrollCount = scrollCount - 1;
+		int i = 0; 
+		mnuVal.put(p, 2);
+		Inventory myInv = curInv.get(p);
+		if (!admin) {
+			myInv = curInv.get(p);
+			mnuVal.put(p, 5);
+		}
+		if (scrollCount + 6 <= items.size()-1) {
+			myInv.setItem(8, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aR&8ight:none"));
+		}
+		if (scrollCount <= 0) {
+			myInv.setItem(0, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aL&8eft:none"));
+		}
+		int distMenu = 6;
+		int val = 0;
+		for (ItemStack item : items) {
+				if (scrollCount <= i) {
+					System.out.println("if 2");
+					if (!(val > distMenu)) {
+						System.out.println("if 3");
+						if (selCat.get(p) == i) {
+							System.out.println("if 4");
+							myInv.setItem(val + 1, enchant_glow.addGlow(item));
+							val++;
+						} else {
+							myInv.setItem(val + 1, item);
+							val++;
+						}
+					}
+					
+			}
+			i++;
+		}
+		curInv.put(p, myInv);
+		p.openInventory(myInv);
+		if (!admin) {
+			mnuVal.put(p, 5);
+		} else {
+			mnuVal.put(p, 2);
+		}
+	}
+	
+	
+	/* - Menu Values
+	 *  - Admin Main Menu (0)
+	 *  - Admin View List (1)
+	 *  - Admin Add/Remove (2)
+	 *  - Player Main Menu (3)
+	 *  - Player View List (4)
+	 *  - Player Add/Remove (5)
+	 */
+	
+	public void mainGUIMenu(Player p, Boolean admin) {
 		if (admin) {
-			Inventory myInv = Bukkit.createInventory(null, 9, ct("&cAdmin &7Main Menu"));
+			mnuVal.put(p, 0);
+			srlVerVal.put(p, 0);
+			Inventory myInv = Bukkit.createInventory(null, 9, ct("&4Admin &7Main Menu"));
 			myInv.setItem(2, getItem("LAVA_BUCKET:0:1:none:&cR&8emove &cM&8enu:none"));
 			myInv.setItem(4, getItem("WATER_BUCKET:0:1:none:&aA&8dd &aM&8enu:none"));
 			myInv.setItem(6, getItem("BUCKET:0:1:none:&9V&8iew &9M&8enu:none"));
-			return myInv;
+			p.openInventory(myInv);
 		} else {
+			mnuVal.put(p, 3);
+			srlHozVal.put(p, 0);
 			Inventory myInv = Bukkit.createInventory(null, 9, ct("&9Player &7Main Menu"));
 			myInv.setItem(2, getItem("LAVA_BUCKET:0:1:none:&aR&8emove &aM&8enu:none"));
 			myInv.setItem(4, getItem("WATER_BUCKET:0:1:none:&aA&8dd &aM&8enu:none"));
 			myInv.setItem(6, getItem("BUCKET:0:1:none:&aV&8iew &aM&8enu:none"));
-			return myInv;
+			p.openInventory(myInv);
 		}
 		
 	}
 	
-	public Inventory addremGUIMenu(Player p, int page, Boolean admin) {
-
+	public List<ItemStack> getMenus() {
+		List<ItemStack> list = new ArrayList<ItemStack>();
+		for (String menu : getBlocks().getStringList("Menus")) {
+			list.add(getItem(getBlocks().getString(menu + ".Block")));
+		}
+		return list;
+	}
+	
+	public List<ItemStack> mnuItems(String mnu) {
+		List<ItemStack> list = new ArrayList<ItemStack>();
+		for (String item : getBlocks().getStringList(mnu + ".Blocks")) {
+			list.add(getItem(item));
+		}
+		return list;
+	}
+	
+	public void addremGUIMenu(Player p, Boolean admin) {
+		mnuVal.put(p, 2);
+		Inventory myInv = Bukkit.createInventory(null, 54, ct("&4Admin &7Add/Remove"));
+		if (!admin) {
+			myInv = Bukkit.createInventory(null, 54, ct("&9Player &7Add/Remove"));
+			mnuVal.put(p, 5);
+		}
+		int maxItems = 0;
+		int maxMenus = 0;
+		int distMenu = 6;
+		int val = 0;
+		selCat.put(p, 0);
+		srlVerVal.put(p, 1);
+		srlHozVal.put(p, 0);
+		List<String> menus = getBlocks().getStringList("Menus");
+		List<String> blocks = getBlocks().getStringList(menus.get(selCat.get(p)) + ".Blocks");
+		maxMenus = menus.size() - 1;
+		maxItems = blocks.size() - 1;
+		
+		// Category Menu
+		for (String menu : menus) {
+				if (val <= distMenu) {
+					if (selCat.get(p) == val) {
+					try {
+						myInv.setItem(val + 1, enchant_glow.addGlow(getItem(getBlocks().getString(menu + ".Block"))));
+					} catch (Exception ex) {
+						addremGUIMenu(p, admin);
+						return;
+					}
+					} else {
+						myInv.setItem(val + 1, getItem(getBlocks().getString(menu + ".Block")));
+					}
+						
+				}
+				val++;
+		}
+		val = 8;
+		for (String Items : blocks) {
+			if (val > 52) {
+				break;
+			}
+				if (val != 17 & val != 26 & val != 35 & val != 44 & val != 53) {
+					myInv.setItem(val + 1, getItem(Items + ":1:none:none:none"));	
+					val++;
+				} else {
+					myInv.setItem(val + 1, getItem(Items + ":1:none:none:none"));
+					val++;
+				}
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		if (srlVerVal.get(p) > 1) {
+			myInv.setItem(17, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aU&8p:none"));
+		} else {
+			myInv.setItem(17, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aU&8p:none"));
+		}
+		if (srlVerVal.get(p) < maxItems) {
+			myInv.setItem(53, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aD&8own:none"));
+		} else {
+			myInv.setItem(53, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aD&8own:none"));
+		}
+		if (srlHozVal.get(p) > 0) {
+			myInv.setItem(0, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aL&8eft:none"));
+		} else {
+			myInv.setItem(0, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aL&8eft:none"));
+		}
+		if (srlHozVal.get(p) < maxMenus) {
+			myInv.setItem(8, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aR&8ight:none"));
+		} else {
+			myInv.setItem(8, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aR&8ight:none"));
+		}
+		myInv.setItem(44, getItem("STAINED_GLASS:0:1:none: :none"));
+		myInv.setItem(35, getItem("STAINED_GLASS:0:1:none: :none"));
+		myInv.setItem(26, getItem("STAINED_GLASS:0:1:none: :none"));
+		curInv.put(p, myInv);
+		p.openInventory(myInv);
+		if (!admin) {
+			mnuVal.put(p, 5);
+		} else {
+			mnuVal.put(p, 2);
+		}
 		
 	}
 	
-	public Inventory viewGUIMenu(Player p, int page, Boolean admin) {
+	public void viewGUIMenu(Player p, int page, Boolean admin) {
 		int invI = 0;
 		List<String> items = new ArrayList<String>();
 		if (admin) {
+			mnuVal.put(p, 1);
+			srlVerVal.put(p, 0);
+			srlHozVal.put(p, 0);
 			items = getConfig().getStringList("Public Pickup Filter.Items");
 		} else {
+			pSend(p, "mnuVal set to 4");
+			mnuVal.put(p, 4);
+			srlVerVal.put(p, 0);
+			srlHozVal.put(p, 0);
 			items = getPlayers().getStringList("Players."+p.getUniqueId().toString()+".Items");
 		}
 		double listLength = items.size();
 		double length = 32;
 		double pages = Math.ceil((double)listLength/(double)length);
 		int i = 0;
-		Inventory myInv = Bukkit.createInventory(null, 36, ct("&cAdmin &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
-		if (admin) {
-			myInv = Bukkit.createInventory(null, 36, ct("&cAdmin &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));	
-		} else {
+		Inventory myInv = Bukkit.createInventory(null, 36, ct("&4Admin &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
+		if (!admin) {
 			myInv = Bukkit.createInventory(null, 36, ct("&9Player &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
 		}
 		for (String item : items) {
@@ -237,7 +618,13 @@ public class main extends JavaPlugin {
 				if (i >= length * (page - 1)) {
 					int max = listener.getMaxFilter(p);
 					if (max >= i+1 || max == -1) {
-						myInv.setItem(invI, enchant_glow.addGlow(getItem(item + ":1:none:none:none")));
+						try {
+							myInv.setItem(invI, enchant_glow.addGlow(getItem(item + ":1:none:none:none")));
+						} catch (Exception ex) {
+							viewGUIMenu(p, page, admin);
+							return;
+						}
+						
 					} else {
 						myInv.setItem(invI, getItem(item + ":1:none:none:none"));
 					}
@@ -258,7 +645,13 @@ public class main extends JavaPlugin {
 		}
 		
 		myInv.setItem(35, getItem("CHEST:0:1:none:&9M&8ain &9M&8enu:none"));
-		return myInv;
+		pSend(p, "Opening Menu");
+		p.openInventory(myInv);
+		if (admin) {
+			mnuVal.put(p, 1);
+		} else {
+			mnuVal.put(p, 4);
+		}
 	}
 	
 	private void help(Player p) {
@@ -588,10 +981,61 @@ public class main extends JavaPlugin {
         	players = new File(getDataFolder(), "players.yml");
         }
         if (!players.exists()) {            
-             this.saveResource("chat.yml", false);
+             this.saveResource("players.yml", false);
          }
     }
     
+    
+    private FileConfiguration blocksConfig = null; //customConfig 
+    private File blocks = null; //customConfigFile
+    
+    
+    public void reloadBlocks() {
+        if (blocks == null) {
+        	blocks = new File(getDataFolder(), "blocks.yml");
+        }
+        blocksConfig = YamlConfiguration.loadConfiguration(blocks);
+        // Look for defaults in the jar
+        Reader defConfigStream;
+		try {
+			defConfigStream = new InputStreamReader(this.getResource("blocks.yml"), "UTF8");
+		
+        if (defConfigStream != null) {
+            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+            blocksConfig.setDefaults(defConfig);
+        }
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    public FileConfiguration getBlocks() {
+        if (blocksConfig == null) {
+            reloadBlocks();
+        }
+        return blocksConfig;
+    }
+    
+    public void saveBlocks() {
+        if (blocksConfig == null || blocksConfig == null) {
+            return;
+        }
+        try {
+        	getBlocks().save(blocks);
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Could not save config to " + players, ex);
+        }
+    }
+    
+    public void saveDefaultBlocks() {
+        if (blocks == null) {
+        	blocks = new File(getDataFolder(), "blocks.yml");
+        }
+        if (!blocks.exists()) {            
+             this.saveResource("blocks.yml", false);
+         }
+    }
     //--- End of chats.yml writing tools
 	
 }
