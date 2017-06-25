@@ -118,6 +118,23 @@ public class listener implements Listener{
 				break;
 			case 2: // Admin Add/Remove
 				plugin.mnuVal.put(p, 2);
+				if (event.getSlot() == 0 & clicked.getData().getData() == (byte) 5){ 
+						plugin.scrollLeft(p, plugin.catItems, plugin.srlHozVal.get(p), true);
+						plugin.pSend(p, "Left");
+				} else
+				if (event.getSlot() == 8 & clicked.getData().getData() == (byte) 5) {
+						plugin.scrollRight(p, plugin.catItems, plugin.srlHozVal.get(p), true);
+						plugin.pSend(p, "Right");
+				} else 
+				if (event.getSlot() == 17 & clicked.getData().getData() == (byte) 5){
+					
+					plugin.scrollUp(p, plugin.catItems, plugin.srlVerVal.get(p), true);
+					plugin.pSend(p, "Up");
+				} else 
+				if (event.getSlot() == 53 & clicked.getData().getData() == (byte) 5) {
+					plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p), true);
+					plugin.pSend(p, "Down");
+				}
 				event.setCancelled(true);
 				break;
 			case 3: // Player Main Menu
@@ -156,7 +173,7 @@ public class listener implements Listener{
 			case 5: // Player Add/Remove
 				plugin.mnuVal.put(p, 5);
 				if (event.getSlot() > 0 & event.getSlot() < 8) { //Category Change
-					plugin.pSend(p, "Category");	
+					plugin.selectCat(p, event.getSlot(), event.getCurrentItem(), false);
 				} else 
 				if (event.getSlot() > 8 & event.getSlot() < 17 || event.getSlot() > 17 & event.getSlot() < 26 || event.getSlot() > 26 & event.getSlot() < 35 || 
 						event.getSlot() > 35 & event.getSlot() < 44 || event.getSlot() > 44 & event.getSlot() < 53 ) { // Selected Item
@@ -164,20 +181,16 @@ public class listener implements Listener{
 				} else 
 				if (event.getSlot() == 0 & clicked.getData().getData() == (byte) 5){ 
 						plugin.scrollLeft(p, plugin.catItems, plugin.srlHozVal.get(p), false);
-						plugin.pSend(p, "Left");
 				} else
 				if (event.getSlot() == 8 & clicked.getData().getData() == (byte) 5) {
 						plugin.scrollRight(p, plugin.catItems, plugin.srlHozVal.get(p), false);
-						plugin.pSend(p, "Right");
 				} else 
 				if (event.getSlot() == 17 & clicked.getData().getData() == (byte) 5){
 					
 					plugin.scrollUp(p, plugin.catItems, plugin.srlVerVal.get(p), false);
-					plugin.pSend(p, "Up");
 				} else 
 				if (event.getSlot() == 53 & clicked.getData().getData() == (byte) 5) {
 					plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p), false);
-					plugin.pSend(p, "Down");
 				}
 		
 				
