@@ -236,6 +236,14 @@ public class main extends JavaPlugin {
 		
 	}
 	
+	public ItemStack glowItem(ItemStack i) {
+		i.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
+		ItemMeta a = i.getItemMeta();
+		a.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		i.setItemMeta(a);
+		return i;
+	}
+	
 	public void fixCat(Player p, int slot, Boolean admin) {
 		int s = 0;
 		Inventory myInv = curInv.get(p);
@@ -275,11 +283,7 @@ public class main extends JavaPlugin {
 			}
 		}
 		if (menuName.equalsIgnoreCase("")) {
-			item.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
-			ItemMeta a = item.getItemMeta();
-			a.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-			item.setItemMeta(a);
-			myInv.setItem(itemSlot, item);
+			myInv.setItem(itemSlot, glowItem(item));
 			return;
 		}
 		selCat.put(p, selectedId);
@@ -322,11 +326,7 @@ public class main extends JavaPlugin {
 				slot++;
 			}
 		}
-		item.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
-		ItemMeta a = item.getItemMeta();
-		a.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-		item.setItemMeta(a);
-		myInv.setItem(itemSlot, item);
+		myInv.setItem(itemSlot, glowItem(item));
 		curInv.put(p, myInv);
 		fixCat(p, selCat.get(p)-(srlHozVal.get(p)-1), admin);
 		p.openInventory(myInv);
@@ -481,11 +481,7 @@ public class main extends JavaPlugin {
 				if (scrollCount <= i) {
 					if (!(val > distMenu)) {
 						if (selCat.get(p) == i) {
-							item.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
-							ItemMeta it = item.getItemMeta();
-							it.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-							item.setItemMeta(it);
-							myInv.setItem(val + 1, item);
+							myInv.setItem(val + 1, glowItem(item));
 							val++;
 						} else {
 							myInv.setItem(val + 1, item);
@@ -528,11 +524,7 @@ public class main extends JavaPlugin {
 				if (scrollCount <= i) {
 					if (!(val > distMenu)) {
 						if (selCat.get(p) == i) {
-							item.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
-							ItemMeta it = item.getItemMeta();
-							it.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-							item.setItemMeta(it);
-							myInv.setItem(val + 1, item);
+							myInv.setItem(val + 1, glowItem(item));
 							val++;
 							
 						} else {
@@ -626,11 +618,7 @@ public class main extends JavaPlugin {
 					if (selCat.get(p) == val) {
 					try {
 						ItemStack item = getItem(getBlocks().getString(menu + ".Block"));
-						item.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
-						ItemMeta it = item.getItemMeta();
-						it.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-						item.setItemMeta(it);
-						myInv.setItem(val + 1, item);
+						myInv.setItem(val + 1, glowItem(item));
 					} catch (Exception ex) {
 						addremGUIMenu(p, admin);
 						return;
@@ -726,11 +714,7 @@ public class main extends JavaPlugin {
 					if (max >= i+1 || max == -1) {
 						try {
 							ItemStack aItem = getItem(item + ":1:none:none:none");
-							aItem.addUnsafeEnchantment(Enchantment.WATER_WORKER, 1);
-							ItemMeta it = aItem.getItemMeta();
-							it.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-							aItem.setItemMeta(it);
-							myInv.setItem(invI, aItem);
+							myInv.setItem(invI, glowItem(aItem));
 						} catch (Exception ex) {
 							viewGUIMenu(p, page, admin);
 							return;
