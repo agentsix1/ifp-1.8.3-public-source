@@ -118,6 +118,9 @@ public class listener implements Listener{
 				break;
 			case 2: // Admin Add/Remove
 				plugin.mnuVal.put(p, 2);
+				if (event.getSlot() > 0 & event.getSlot() < 8) { //Category Change
+					plugin.selectCat(p, event.getSlot(), event.getCurrentItem(), true);
+				}
 				if (event.getSlot() == 0 & clicked.getData().getData() == (byte) 5){ 
 						plugin.scrollLeft(p, plugin.catItems, plugin.srlHozVal.get(p), true);
 						plugin.pSend(p, "Left");
