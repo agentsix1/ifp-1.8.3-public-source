@@ -89,6 +89,7 @@ public class listener implements Listener{
 				plugin.mnuVal.put(p, 0);
 				event.setCancelled(true);
 				if (clicked.getType().toString().equals("LAVA_BUCKET")) {
+					 plugin.clearList(p, true);
 					 p.closeInventory();
 				 }
 				if (clicked.getType().toString().equals("WATER_BUCKET")) {
@@ -118,9 +119,23 @@ public class listener implements Listener{
 				break;
 			case 2: // Admin Add/Remove
 				plugin.mnuVal.put(p, 2);
+				if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) { 
+					plugin.mainGUIMenu(p, true);
+				}
 				if (event.getSlot() > 0 & event.getSlot() < 8) { //Category Change
 					plugin.selectCat(p, event.getSlot(), event.getCurrentItem(), true);
-				}
+				} else 
+					if (event.getSlot() > 8 & event.getSlot() < 17 || event.getSlot() > 17 & event.getSlot() < 26 || event.getSlot() > 26 & event.getSlot() < 35 || 
+							event.getSlot() > 35 & event.getSlot() < 44 || event.getSlot() > 44 & event.getSlot() < 53 ) { // Selected Item
+						if (event.getCurrentItem().getItemMeta().hasEnchants()) {
+							plugin.removeItem(p, event.getCurrentItem(), true);
+							plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p) - 1, true);
+						} else {
+							plugin.addItem(p, event.getCurrentItem(), true);
+							plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p)-1, true);
+						}
+						
+					} else 
 				if (event.getSlot() == 0 & clicked.getData().getData() == (byte) 5){ 
 						plugin.scrollLeft(p, plugin.catItems, plugin.srlHozVal.get(p), true);
 						plugin.pSend(p, "Left");
@@ -144,7 +159,8 @@ public class listener implements Listener{
 				plugin.mnuVal.put(p, 3);
 				event.setCancelled(true);
 				if (clicked.getType().toString().equals("LAVA_BUCKET")) {
-					 p.closeInventory();
+					plugin.clearList(p, false);
+					p.closeInventory();
 				 }
 				if (clicked.getType().toString().equals("WATER_BUCKET")) {
 					plugin.srlVerVal.put(p, 0);
@@ -175,12 +191,22 @@ public class listener implements Listener{
 				break;
 			case 5: // Player Add/Remove
 				plugin.mnuVal.put(p, 5);
+				if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) { 
+					plugin.mainGUIMenu(p, false);
+				}
 				if (event.getSlot() > 0 & event.getSlot() < 8) { //Category Change
 					plugin.selectCat(p, event.getSlot(), event.getCurrentItem(), false);
 				} else 
 				if (event.getSlot() > 8 & event.getSlot() < 17 || event.getSlot() > 17 & event.getSlot() < 26 || event.getSlot() > 26 & event.getSlot() < 35 || 
 						event.getSlot() > 35 & event.getSlot() < 44 || event.getSlot() > 44 & event.getSlot() < 53 ) { // Selected Item
-					plugin.pSend(p, "Item");
+					if (event.getCurrentItem().getItemMeta().hasEnchants()) {
+						plugin.removeItem(p, event.getCurrentItem(), false);
+						plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p) - 1, false);
+					} else {
+						plugin.addItem(p, event.getCurrentItem(), false);
+						plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p)-1, false);
+					}
+					
 				} else 
 				if (event.getSlot() == 0 & clicked.getData().getData() == (byte) 5){ 
 						plugin.scrollLeft(p, plugin.catItems, plugin.srlHozVal.get(p), false);
@@ -223,9 +249,8 @@ public class listener implements Listener{
         	}  
     }
 
-	@SuppressWarnings("unused")
 	public static boolean checkPrivateFiler(Player p, ItemStack i) {
-		if (!false) { //Database: Enabled: false
+		//if (!false) { //Database: Enabled: false
 			if (p.hasPermission("itemfilterpickup.user") || p.hasPermission("itemfilterpickup.user.canfilter")) {
 				if (plugin.getPlayers().getBoolean("Players." + p.getUniqueId().toString() + ".Enabled")) {
 					int b = 1;
@@ -254,10 +279,52 @@ public class listener implements Listener{
 			} else{
 				return false;
 			}
-		} else {
+		/*} else {
 			return false;
 			//return database.checkDatabase(p, i);
+		}*/
+	}
+	
+	public static boolean checkBeyondMaxC(Player p, ItemStack i) {
+		int b = 1;
+		int max = getMaxFilter(p);
+		for (String filter : plugin.getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items")) {
+			if (max == -1) {
+				ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
+				if (i.equals(itemA)) {
+					return true;
+				}
+				b++;
+			} else if (b <= max && max != -1) { 
+				ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
+				if (i.equals(itemA)) {
+					return true;
+				}
+				b++;
+			} else {
+				break;
+			}
 		}
+		return false;
+	}
+
+	public static boolean checkPrivateFilerC(Player p, ItemStack i) {
+		//if (!false) { //Database: Enabled: false
+			if (p.hasPermission("itemfilterpickup.user") || p.hasPermission("itemfilterpickup.user.canfilter")) {
+				for (String filter : plugin.getPlayers().getStringList("Players." + p.getUniqueId().toString() + ".Items")) {
+						ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
+						if (i.equals(itemA)) {
+							return true;
+						}
+				}
+				return false;
+			} else{
+				return false;
+			}
+		/*} else {
+			return false;
+			//return database.checkDatabase(p, i);
+		}*/
 	}
 
 	private static boolean checkPublicFilter(Player p, ItemStack i) {
@@ -273,6 +340,20 @@ public class listener implements Listener{
 			} else {
 				return false;
 			}
+		} else{
+			return false;
+		}
+	}
+	
+	public static boolean checkPublicFilterC(Player p, ItemStack i) {
+		if (!p.hasPermission("itemfilterpickup.user.bypass.public") || !p.hasPermission("itemfilterpickup.admin")) {
+				for (String filter : plugin.getConfig().getStringList("Public Pickup Filter.Items")) {
+					ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
+					if (i.equals(itemA)) {
+						return true;
+					}
+				}
+				return false;
 		} else{
 			return false;
 		}
