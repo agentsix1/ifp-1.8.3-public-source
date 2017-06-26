@@ -71,16 +71,7 @@ public class main extends JavaPlugin {
 			catItems.add(getItem(getBlocks().getString(menu + ".Block")));
 		}
 					
-	}	
-	
-	/*public List<ItemStack> getMenuItems(String menu) {
-		List<ItemStack> its = new ArrayList<ItemStack>();
-		List<String> preItem = getBlocks().getStringList(menu);
-		for (String it : preItem) {
-		}
-		return its;
-		
-	}*/
+	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String cmdLabel, String[] args) {
 		if (sender instanceof Player) {
@@ -273,7 +264,6 @@ public class main extends JavaPlugin {
 			myInv.setItem(selCat.get(p)+1-srlHozVal.get(p), getItem(getBlocks().getString(menus.get(selCat.get(p)) + ".Block")));
 		}
 		
-		//item = getItem(getBlocks().getString(menus.get(selCat.get(p)) + ".Block"));
 		String menuName = "";
 		int selectedId = 0;
 		int i = -1;
@@ -592,7 +582,7 @@ public class main extends JavaPlugin {
 				Inventory myInv = Bukkit.createInventory(null, 9, ct("&4Admin &7Main Menu"));
 				myInv.setItem(4, getItem("LAVA_BUCKET:0:1:none:&6C&8lear &6L&8ist:none"));
 				myInv.setItem(2, getItem("WATER_BUCKET:0:1:none:&aA&8dd &aM&8enu:none"));
-				myInv.setItem(6, getItem("BUCKET:0:1:none:&9V&8iew &9M&8enu:none"));
+				myInv.setItem(6, getItem("BUCKET:0:1:none:&9V&8iew &9L&8ist:none"));
 				p.openInventory(myInv);
 			} else {
 				pSend(p, getConfig().getString("Messages.no-permission"));
@@ -603,7 +593,11 @@ public class main extends JavaPlugin {
 			Inventory myInv = Bukkit.createInventory(null, 9, ct("&9Player &7Main Menu"));
 			myInv.setItem(4, getItem("LAVA_BUCKET:0:1:none:&6C&8lear &6L&8ist:none"));
 			myInv.setItem(2, getItem("WATER_BUCKET:0:1:none:&aA&8dd &aM&8enu:none"));
-			myInv.setItem(6, getItem("BUCKET:0:1:none:&aV&8iew &aM&8enu:none"));
+			myInv.setItem(6, getItem("BUCKET:0:1:none:&aV&8iew &aL&8ist:none"));
+			if (p.hasPermission("itemfilterpickup.public.view")) {
+				myInv.setItem(8, getItem("BUCKET:0:1:none:&aV&8iew &aP&8ublic &aL&8ist:none"));	
+			}
+			
 			p.openInventory(myInv);
 		}
 		
@@ -761,7 +755,7 @@ public class main extends JavaPlugin {
 		
 	}
 	
-	public void viewGUIMenu(Player p, int page, Boolean admin) {
+	public void viewGUIMenu(Player p, int page, Boolean admin, Boolean pubView) {
 		int invI = 0;
 		List<String> items = new ArrayList<String>();
 		if (admin) {
@@ -779,7 +773,11 @@ public class main extends JavaPlugin {
 		double length = 32;
 		double pages = Math.ceil((double)listLength/(double)length);
 		int i = 0;
-		Inventory myInv = Bukkit.createInventory(null, 36, ct("&4Admin &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
+		Inventory myInv = Bukkit.createInventory(null, 36, ct("&9Public &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
+		if (!pubView) {
+			myInv = Bukkit.createInventory(null, 36, ct("&4Admin &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
+		}
+		
 		if (!admin) {
 			myInv = Bukkit.createInventory(null, 36, ct("&9Player &7List &r(" + page + "/" + (pages + "").replace(".0", "") + ")"));
 		}
@@ -797,7 +795,7 @@ public class main extends JavaPlugin {
 							}
 							
 						} catch (Exception ex) {
-							viewGUIMenu(p, page, admin);
+							viewGUIMenu(p, page, admin, pubView);
 							return;
 						}
 						

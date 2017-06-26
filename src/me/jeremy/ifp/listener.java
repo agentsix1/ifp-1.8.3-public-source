@@ -42,16 +42,18 @@ public class listener implements Listener{
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e) {
-		Player p = Bukkit.getPlayer(e.getPlayer().getName());
-		if (plugin.mnuVal.get(p) > -1) {
-			plugin.mnuVal.put(p, -1);
+		if (plugin.mnuVal.containsKey(Bukkit.getPlayer(e.getPlayer().getName()))) {
+			Player p = Bukkit.getPlayer(e.getPlayer().getName());
+			if (plugin.mnuVal.get(p) > -1) {
+				plugin.mnuVal.put(p, -1);
+			}
 		}
+		
 	}
 	
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
-
 		Player p = (Player) event.getWhoClicked();
 		ItemStack clicked = event.getCurrentItem();
 		Inventory inventory = event.getInventory();
@@ -97,8 +99,8 @@ public class listener implements Listener{
 					plugin.srlHozVal.put(p, 0);
 					 plugin.addremGUIMenu(p, true);
 				 }
-				if (clicked.getType().toString().equals("BUCKET")) {
-					plugin.viewGUIMenu(p, 1, true);
+				if (clicked.getType().toString().equals("BUCKET") & event.getSlot() == 6) {
+					plugin.viewGUIMenu(p, 1, true, false);
 				 }
 				break;
 			case 1: // Admin View List
@@ -107,14 +109,29 @@ public class listener implements Listener{
 				if (clicked.getType().toString().equals("STAINED_GLASS")) {
 					if (clicked.getData().getData() == (byte) 14) {
 						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						plugin.viewGUIMenu(p, pg - 1, true);
+						if (event.getInventory().getName().contains(plugin.ct("&9Public &7List"))) {
+							plugin.viewGUIMenu(p, pg - 1, true, true);
+						} else {
+							plugin.viewGUIMenu(p, pg - 1, true, false);
+						}
+						
 					}
 					if (clicked.getData().getData() == (byte) 5) {
 						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						plugin.viewGUIMenu(p, pg + 1, true);
+						if (event.getInventory().getName().contains(plugin.ct("&9Public &7List"))) {
+							plugin.viewGUIMenu(p, pg + 1, true, true);
+						} else {
+							plugin.viewGUIMenu(p, pg + 1, true, false);
+						}
+						//plugin.viewGUIMenu(p, pg + 1, true, false);
 					}
-				} else if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) { 
-					plugin.mainGUIMenu(p, true);
+				} else if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) {
+					if (event.getInventory().getName().contains(plugin.ct("&9Public &7List"))) {
+						plugin.mainGUIMenu(p, false);
+					} else {
+						plugin.mainGUIMenu(p, true);
+					}
+					
 				}
 				break;
 			case 2: // Admin Add/Remove
@@ -168,9 +185,11 @@ public class listener implements Listener{
 					 plugin.addremGUIMenu(p, false);
 					 
 				 }
-				if (clicked.getType().toString().equals("BUCKET")) {
-					plugin.viewGUIMenu(p, 1, false);
-
+				if (clicked.getType().toString().equals("BUCKET") & event.getSlot() == 6) {
+					plugin.viewGUIMenu(p, 1, false, false);
+				 } 
+				if (clicked.getType().toString().equals("BUCKET") & event.getSlot() == 8) {
+					plugin.viewGUIMenu(p, 1, true, true);
 				 } 
 				break;
 			case 4: // Player View List
@@ -179,11 +198,11 @@ public class listener implements Listener{
 				if (clicked.getType().toString().equals("STAINED_GLASS")) {
 					if (clicked.getData().getData() == (byte) 14) {
 						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						plugin.viewGUIMenu(p, pg - 1, false);
+						plugin.viewGUIMenu(p, pg - 1, false, false);
 					}
 					if (clicked.getData().getData() == (byte) 5) {
 						int pg = Integer.parseInt(inventory.getName().split("\\(")[1].split("\\/")[0]);
-						plugin.viewGUIMenu(p, pg + 1, false);
+						plugin.viewGUIMenu(p, pg + 1, false, false);
 					}
 				} else if (clicked.getType().toString().equals("CHEST") && clicked.getItemMeta().getDisplayName().equals(plugin.ct("&9M&8ain &9M&8enu"))) { 
 					plugin.mainGUIMenu(p, false);
