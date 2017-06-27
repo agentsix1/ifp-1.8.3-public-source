@@ -9,6 +9,7 @@ Menus:
 - Combat
 - Brewing
 - Materials
+#Item:Byte:Amount:Encahnt@value,Enchant@value:Name:Lore1,Lore2,Lore3
 Building Blocks:
   Block: BRICK:0:1:none:&aB&8uilding &aB&8locks:none
   Blocks:
