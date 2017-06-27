@@ -238,6 +238,7 @@ public class main extends JavaPlugin {
 		return i;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void fixCat(Player p, int slot, Boolean admin) {
 		int s = 0;
 		Inventory myInv = curInv.get(p);
@@ -245,10 +246,10 @@ public class main extends JavaPlugin {
 			s++;
 			if (myInv.getItem(s).getItemMeta().hasEnchants() & s != slot) {
 				ItemStack i = myInv.getItem(s);
-				String blockData = i.getData().toString();
-				 String[] d = blockData.split("\\(");
-				 blockData = d[1].replace(")", "");
-				ItemStack newI = getItem(i.getType().toString() + ":" + blockData + ":1:none:none:none");
+				ItemStack newI = getItem(i.getType().toString() + ":" + i.getData().getData() + ":1:none:none:none");
+				ItemMeta newIM = newI.getItemMeta();
+				newIM.setDisplayName(i.getItemMeta().getDisplayName());
+				newI.setItemMeta(newIM);
 				myInv.setItem(s, newI);
 			}
 		}
@@ -348,7 +349,7 @@ public class main extends JavaPlugin {
 		}
 		List<String> menus = getBlocks().getStringList("Menus");
 		List<String> blocks = getBlocks().getStringList(menus.get(selCat.get(p)) + ".Blocks");
-		if ((scrollCount*8) + (8*5) >= blocks.size()-1) {
+		if ((scrollCount*8) + (8*5) >= blocks.size()+27-1) {
 			myInv.setItem(53, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aD&8own:none"));
 		} else {
 			myInv.setItem(53, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aD&8own:none"));
@@ -408,7 +409,7 @@ public class main extends JavaPlugin {
 	}
 	
 	public void scrollDown(Player p, List<ItemStack> items, int scrollCount, Boolean admin) {
-			srlVerVal.put(p, scrollCount + 1);
+		srlVerVal.put(p, scrollCount + 1);
 		mnuVal.put(p, 2);
 		Inventory myInv = curInv.get(p);
 		if (!admin) {
@@ -417,7 +418,7 @@ public class main extends JavaPlugin {
 		}
 		List<String> menus = getBlocks().getStringList("Menus");
 		List<String> blocks = getBlocks().getStringList(menus.get(selCat.get(p)) + ".Blocks");
-		if ((scrollCount*8) + (8*5) >= blocks.size()-1) {
+		if ((scrollCount*8) + (8*5) >= blocks.size()+9-1) {
 			myInv.setItem(53, getItem("STAINED_GLASS:14:1:none:&aS&8croll &aD&8own:none"));
 		} else {
 			myInv.setItem(53, getItem("STAINED_GLASS:5:1:none:&aS&8croll &aD&8own:none"));
@@ -576,7 +577,7 @@ public class main extends JavaPlugin {
 	public void mainGUIMenu(Player p, Boolean admin) {
 		p.closeInventory();
 		if (admin) {
-			if (p.hasPermission("itemfilterpickup.admin")) {
+			if (p.hasPermission("itemfilterpickup.admin") || p.hasPermission("itemfilterpickup.admin.edit")) {
 				mnuVal.put(p, 0);
 				srlVerVal.put(p, 0);
 				Inventory myInv = Bukkit.createInventory(null, 9, ct("&4Admin &7Main Menu"));
@@ -644,7 +645,7 @@ public class main extends JavaPlugin {
 			for (String item : getConfig().getStringList("Public Pickup Filter.Items")) {
 				ItemStack it = getItem(item + ":1:none:none:none");
 				if (it.equals(i)) {
-					if (!listener.checkPublicFilterC(p, it)) {
+					if (listener.checkPublicFilterGlow(p, it)) {
 						it = glowItem(it);
 						it = addLore(it, "&a&lIs No Longer Being Picked Up,&7Click To Remove Me");
 						return it;					
@@ -788,11 +789,7 @@ public class main extends JavaPlugin {
 					if (max >= i+1 || max == -1) {
 						try {
 							ItemStack aItem = getItem(item + ":1:none:none:none");
-							if (!admin) {
-								myInv.setItem(invI, glowItem(aItem));
-							} else {
-								myInv.setItem(invI, aItem);
-							}
+							myInv.setItem(invI, glowItem(aItem));
 							
 						} catch (Exception ex) {
 							viewGUIMenu(p, page, admin, pubView);
@@ -887,7 +884,10 @@ public class main extends JavaPlugin {
 			}
 		}
 		if (!state) {
-			pSend(p, getConfig().getString("Messages.no-permission"));
+			if (!string.equalsIgnoreCase("itemfilterpickup.admin")) {
+				pSend(p, getConfig().getString("Messages.no-permission"));
+			}
+			
 			return false;
 		}
 		return true;
@@ -966,7 +966,7 @@ public class main extends JavaPlugin {
 		
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "deprecation" })
 	public void removeItem(Player p, ItemStack i, Boolean admin) {
 		if (false) {
 			//if (database.removeItem(p, p.getItemInHand().getType().toString() + ":" + p.getItemInHand().getData().toString().split("\\(")[1].split("\\)")[0])) {
@@ -983,7 +983,7 @@ public class main extends JavaPlugin {
 			}
 				
 			
-					if (removeItems.remove(i.getType().toString() + ":" + i.getData().toString().split("\\(")[1].split("\\)")[0])) {
+					if (removeItems.remove(i.getType().toString() + ":" + i.getData().getData())) {
 						if (admin) {
 							getConfig().set("Public Pickup Filter.Items", removeItems);
 							saveConfig();
@@ -1010,10 +1010,10 @@ public class main extends JavaPlugin {
 		
 	}
 	
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "deprecation" })
 	public void addItem(Player p, ItemStack i, Boolean admin) {
 			if (false) {
-				String item = i.getData().toString().split("\\(")[1].split("\\)")[0];
+				String item = i.getData().getData() + "";
 				/*if (database.addToFilter(p, p.getItemInHand().getType().toString() + ":" + item)) {
 					pSend(p, getConfig().getString("Messages.add-to-filter").replace("%ITEM%", p.getItemInHand().getType().toString()));
 				} else {
@@ -1022,7 +1022,7 @@ public class main extends JavaPlugin {
 				
 			} else { 
 				List<String> items = new ArrayList<String>();
-				String item = i.getData().toString().split("\\(")[1].split("\\)")[0];
+				String item = i.getData().getData() + "";
 				if (admin) {
 					items = getConfig().getStringList("Public Pickup Filter.Items");
 				} else {
@@ -1198,7 +1198,7 @@ public class main extends JavaPlugin {
         try {
         	getBlocks().save(blocks);
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Could not save config to " + players, ex);
+            getLogger().log(Level.SEVERE, "Could not save config to " + blocks, ex);
         }
     }
     

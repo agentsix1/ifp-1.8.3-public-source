@@ -75,6 +75,7 @@ public class listener implements Listener{
 			plugin.pSend(p, "Canceled");
 			event.setCancelled(true);
 			
+			
 		}
 		
 			/* - Menu Values
@@ -155,20 +156,16 @@ public class listener implements Listener{
 					} else 
 				if (event.getSlot() == 0 & clicked.getData().getData() == (byte) 5){ 
 						plugin.scrollLeft(p, plugin.catItems, plugin.srlHozVal.get(p), true);
-						plugin.pSend(p, "Left");
 				} else
 				if (event.getSlot() == 8 & clicked.getData().getData() == (byte) 5) {
 						plugin.scrollRight(p, plugin.catItems, plugin.srlHozVal.get(p), true);
-						plugin.pSend(p, "Right");
 				} else 
 				if (event.getSlot() == 17 & clicked.getData().getData() == (byte) 5){
 					
 					plugin.scrollUp(p, plugin.catItems, plugin.srlVerVal.get(p), true);
-					plugin.pSend(p, "Up");
 				} else 
 				if (event.getSlot() == 53 & clicked.getData().getData() == (byte) 5) {
 					plugin.scrollDown(p, plugin.catItems, plugin.srlVerVal.get(p), true);
-					plugin.pSend(p, "Down");
 				}
 				event.setCancelled(true);
 				break;
@@ -366,6 +363,20 @@ public class listener implements Listener{
 	
 	public static boolean checkPublicFilterC(Player p, ItemStack i) {
 		if (!p.hasPermission("itemfilterpickup.user.bypass.public") || !p.hasPermission("itemfilterpickup.admin")) {
+				for (String filter : plugin.getConfig().getStringList("Public Pickup Filter.Items")) {
+					ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
+					if (i.equals(itemA)) {
+						return true;
+					}
+				}
+				return false;
+		} else{
+			return false;
+		}
+	}
+	
+	public static boolean checkPublicFilterGlow(Player p, ItemStack i) {
+		if (p.hasPermission("itemfilterpickup.admin.edit") || p.hasPermission("itemfilterpickup.admin")) {
 				for (String filter : plugin.getConfig().getStringList("Public Pickup Filter.Items")) {
 					ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
 					if (i.equals(itemA)) {
