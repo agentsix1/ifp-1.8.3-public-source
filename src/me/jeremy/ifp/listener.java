@@ -262,7 +262,7 @@ public class listener implements Listener{
         	if (checkPrivateFiler(p, e.getItem().getItemStack())) {
         		e.setCancelled(true);
         		return;
-        	}  
+        	} 
     }
 
 	public static boolean checkPrivateFiler(Player p, ItemStack i) {
@@ -344,7 +344,10 @@ public class listener implements Listener{
 	}
 
 	private static boolean checkPublicFilter(Player p, ItemStack i) {
-		if (!p.hasPermission("itemfilterpickup.user.bypass.public") || !p.hasPermission("itemfilterpickup.admin")) {
+		if (p.hasPermission("itemfilterpickup.public.bypass")) {
+			return false;
+		} else {
+		if (!p.hasPermission("itemfilterpickup.admin")) {
 			if (plugin.getConfig().getBoolean("Public Pickup Filter.Enabled")) {
 				for (String filter : plugin.getConfig().getStringList("Public Pickup Filter.Items")) {
 					ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
@@ -359,10 +362,14 @@ public class listener implements Listener{
 		} else{
 			return false;
 		}
+		}
 	}
 	
 	public static boolean checkPublicFilterC(Player p, ItemStack i) {
-		if (!p.hasPermission("itemfilterpickup.user.bypass.public") || !p.hasPermission("itemfilterpickup.admin")) {
+		if (p.hasPermission("itemfilterpickup.public.bypass")) {
+			return false;
+		} else {
+		if (!p.hasPermission("itemfilterpickup.admin")) {
 				for (String filter : plugin.getConfig().getStringList("Public Pickup Filter.Items")) {
 					ItemStack itemA = new ItemStack(Material.matchMaterial(filter.split(":")[0]), i.getAmount(), (byte) Integer.parseInt(filter.split(":")[1]));
 					if (i.equals(itemA)) {
@@ -372,6 +379,7 @@ public class listener implements Listener{
 				return false;
 		} else{
 			return false;
+		}
 		}
 	}
 	

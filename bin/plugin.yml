@@ -1,5 +1,5 @@
 name: ItemFilterPickup
-version: 0.0.1
+version: 0.0.2
 description: This plugin is used to detect items being picked up and limit what the player wants to pickup
 author: Agentsix1
 main: me.jeremy.ifp.main
@@ -21,7 +21,7 @@ permissions:
     default: op
   itemfilterpickup.admin.toggle:
     default: op
-  itemfilterpickup.public.byass:
+  itemfilterpickup.public.bypass:
     default: op
   itemfilterpickup.public.view:
     default: op
